@@ -1,0 +1,116 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "com.benrhine",
+    "module": "slack-alerts",
+    "version": "1.0.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "7.5"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "slack-alerts-1.0.0.jar",
+          "url": "slack-alerts-1.0.0.jar",
+          "size": 49870,
+          "sha512": "6e15243166155981e6d1070b7d41d44d7e1790ed5cc564324066f9ae717f4a3d8c05927a9b15e0521450914a4ac6808e4c4fd8b9446247f69df03035814e3ee4",
+          "sha256": "43bea468f63c46b26c34c73e8c18ff0e9a952d67ad864bfd2133f29159483e47",
+          "sha1": "403855a108982726a175096ece36fac4fbc79fb2",
+          "md5": "6a0be0c0e1f32f5311ed9986060751a8"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 17,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "com.google.code.gson",
+          "module": "gson",
+          "version": {
+            "requires": "2.8.5"
+          }
+        },
+        {
+          "group": "org.apache.httpcomponents",
+          "module": "httpmime",
+          "version": {
+            "requires": "4.3.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "slack-alerts-1.0.0.jar",
+          "url": "slack-alerts-1.0.0.jar",
+          "size": 49870,
+          "sha512": "6e15243166155981e6d1070b7d41d44d7e1790ed5cc564324066f9ae717f4a3d8c05927a9b15e0521450914a4ac6808e4c4fd8b9446247f69df03035814e3ee4",
+          "sha256": "43bea468f63c46b26c34c73e8c18ff0e9a952d67ad864bfd2133f29159483e47",
+          "sha1": "403855a108982726a175096ece36fac4fbc79fb2",
+          "md5": "6a0be0c0e1f32f5311ed9986060751a8"
+        }
+      ]
+    },
+    {
+      "name": "javadocElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "javadoc",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "slack-alerts-1.0.0-javadoc.jar",
+          "url": "slack-alerts-1.0.0-javadoc.jar",
+          "size": 261,
+          "sha512": "5660decb646992cba5151be6a62fddebce8b1501e1362f8c8b958ae3d64386193ea86e742589a074099c389afb2725b861e1eacf52bdb2d94b6cf89b88f8377a",
+          "sha256": "08499d1ffa8a97ea5b6559800ea9cd3b51180c815aa6afd13ffd1ed5108adfd5",
+          "sha1": "29fd1581c63822b0b172e450346dc98273bf29da",
+          "md5": "2c79f88031e3775d66258cab15c10317"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "slack-alerts-1.0.0-sources.jar",
+          "url": "slack-alerts-1.0.0-sources.jar",
+          "size": 9634,
+          "sha512": "0e4ff3e1f62c9a1a652048f690b74eaf3d706e1d9c7c7ba9e4a64f43b5e0468d0a4ab5d59f6ac0afb887ee1b82260a087b89f45e6ec9f221e3c1bc0bd0ad9519",
+          "sha256": "efa304bd5a952f4825632834d28703ef713fdc786c3311b3fa127ee7f62b1840",
+          "sha1": "2944963e5f3dc807bd5ef8bdb97fd306327a6d62",
+          "md5": "ff92a4fabb80012c10623e715c0bbba4"
+        }
+      ]
+    }
+  ]
+}

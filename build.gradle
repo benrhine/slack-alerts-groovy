@@ -1,0 +1,170 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+//        classpath 'com.benrhine:slack-alerts:1.0.0'
+    }
+}
+
+plugins {
+    id "com.gradle.plugin-publish" version "1.1.0"
+    id "luisrjaeger.auto-versioning" version "1.0.6"
+    id 'groovy'
+}
+
+description 'Gradle plugin that create tasks to post messages on Slack Webhook'
+group 'com.benrhine'
+version autoVersion.versionName()
+ext.pluginId = 'com.benrhine.slack-alerts'
+ext.branch = 'main'
+ext.commit = 'XXXXXX'
+
+autoVersion {
+    versionCycle = 100
+    releaseNotesFileName = null
+}
+
+//apply plugin: 'com.benrhine.slack-alerts'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'com.google.code.gson:gson:2.8.5'
+//    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+//    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+//    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime
+//    implementation 'org.apache.httpcomponents:httpmime:4.3.1'
+    // https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
+
+
+}
+
+// Specify plugin properties that apply to the whole publishing bundle (ie. all plugins in the current publication).
+pluginBundle {
+    website = 'https://github.com/benrhine/slack-alerts-groovy'
+    vcsUrl = 'https://github.com/benrhine/slack-alerts-groovy'
+    description = project.description
+    tags = ['slack', 'webhook', 'message', 'bot']
+}
+
+gradlePlugin {
+    plugins {
+        slackAlertsPlugin {
+            id = project.pluginId
+            description = project.description
+            displayName = 'Slack Alerts'
+            implementationClass = 'com.benrhine.plugins.v1.SlackAlertsPlugin'
+        }
+    }
+}
+
+ext.color = "good"
+
+// This will build static messages at application startup time
+//slack {
+//    publishedPlugin {
+//        webHook = "https://hooks.slack.com/services/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"
+//        attachment {
+//            fallback = "New version successfully published."
+//            pretext = "New version successfully published."
+//            color = "$color"
+//            field {
+//                title = "Module"
+//                value = project.name
+//                shortValue = true
+//            }
+//            field {
+//                title = "Version"
+//                value = project.version
+//                shortValue = true
+//            }
+//        }
+//        attachment {
+//            fallback = "Another line on sent together."
+//            pretext = "Another line on sent together."
+//            color = "$color"
+//            field {
+//                title = "Something"
+//                value = "Something text"
+//            }
+//        }
+//    }
+//    unitTestSuccess {
+//        webHook = "https://hooks.slack.com/services/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"
+//        attachment {
+//            fallback = "Unit tests successfully completed."
+//            pretext = "Unit tests successfully completed."
+//            color = "$color"
+//            field {
+//                title = "Application"
+//                value = project.name
+//                shortValue = true
+//            }
+//            field {
+//                title = "Version"
+//                value = project.version
+//                shortValue = true
+//            }
+//            field {
+//                title = "Branch"
+//                value = "$branch"
+//                shortValue = true
+//            }
+//            field {
+//                title = "Commit"
+//                value = "$commit"
+//                shortValue = true
+//            }
+//        }
+//        attachment {
+//            color = "$color"
+//            field {
+//                title = "Results"
+//                value = "Something text"
+//            }
+//        }
+//    }
+//    intTestSuccess {
+//        webHook = "https://hooks.slack.com/services/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"
+//        attachment {
+//            fallback = "Integration tests successfully completed."
+//            pretext = "Integration tests successfully completed."
+//            color = "$color"
+//            field {
+//                title = "Application"
+//                value = project.name
+//                shortValue = true
+//            }
+//            field {
+//                title = "Version"
+//                value = project.version
+//                shortValue = true
+//            }
+//            field {
+//                title = "Branch"
+//                value = "$branch"
+//                shortValue = true
+//            }
+//            field {
+//                title = "Commit"
+//                value = "$commit"
+//                shortValue = true
+//            }
+//        }
+//        attachment {
+//            color = "$color"
+//            field {
+//                title = "Results"
+//                value = "Something text"
+//            }
+//        }
+//    }
+//}
