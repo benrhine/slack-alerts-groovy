@@ -11,7 +11,7 @@ import org.gradle.api.tasks.TaskAction
 /** --------------------------------------------------------------------------------------------------------------------
  * SlackPostDynamicMessage: TODO fill me in.
  * ------------------------------------------------------------------------------------------------------------------ */
-class SlackPostDynamicMessage extends DefaultTask {
+class SendDynamicAlertTask extends DefaultTask {
 
     @Internal boolean displayLogging
     @Internal String  messageName

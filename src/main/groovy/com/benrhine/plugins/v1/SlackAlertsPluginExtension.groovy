@@ -1,14 +1,14 @@
 package com.benrhine.plugins.v1
 
-import com.benrhine.plugins.v1.model.Attachment
-import com.benrhine.plugins.v1.model.Message
-
 /** --------------------------------------------------------------------------------------------------------------------
  * SlackAlertsPluginExtension: TODO fill me in.
  * ------------------------------------------------------------------------------------------------------------------ */
 class SlackAlertsPluginExtension {
+    transient String environment
     transient String webHook
     transient String uploadUrl
+    transient String token
+    transient String channels
 
     transient String payload
 

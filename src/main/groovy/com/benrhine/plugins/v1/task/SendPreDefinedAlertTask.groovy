@@ -8,11 +8,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 
-class SlackTask extends DefaultTask {
+class SendPreDefinedAlertTask extends DefaultTask {
 
     @Internal Message messageToSend
-
-    SlackTask() { }
 
     @TaskAction
     def postMessage() {

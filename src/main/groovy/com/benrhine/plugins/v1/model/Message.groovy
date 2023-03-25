@@ -3,34 +3,30 @@ package com.benrhine.plugins.v1.model
 class Message {
 
     transient final String name
-
     transient String webHook
-
     transient String uploadUrl
 
     boolean displayLogging = false
 
+    String uploadFilePath
+    String uploadFileName
+    String uploadFileType
+    String uploadTitle
+    String authType
+    String environment
+    String token
     String payload
-
     String channel
-
     String iconUrl
-
     String iconEmoji
-
     String text
-
     String username
-
     String threadTs
-
     Boolean mrkdwn
+    String channels
 
     def attachments = []
-
     def blocks = []
-
-    Message() {}
 
     Message(String name) {
         this.name = name
@@ -48,7 +44,7 @@ class Message {
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         Block block = new Block()
         closure.delegate = block
-        blockss << block
+        blocks << block
         closure()
     }
 
