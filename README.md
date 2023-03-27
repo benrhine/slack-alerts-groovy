@@ -8,6 +8,39 @@ has additional pre-configured tasks that when declared within the DSL allow you 
 This plugin has been tested with the now deprecated Slack WebHook api as well as the currently suggested way of using a 
 WebHook through a custom Slack Bot. Both configurations and file upload are fully supported.
 
+[Including the plugin](#including-the-plugin)
+[Developer / Legacy plugin include](#developer--legacy-plugin-include)
+[Configuration](#configuration)
+[Default](#default)
+[IMPORTANT Note!!!](#important-note---)
+[Issue Remediation](#issue-remediation)
+[Message Configuration](#message-configuration)
+[Global](#global)
+[environment](#environment--optional-)
+[webHook](#webhook--optional-)
+[uploadUrl](#uploadurl--optional-)
+[token](#token--optional-)
+[channels](#channels--optional-)
+[payload](#payload--optional-)
+[displayLogging](#displaylogging--optional-)
+[Dynamically Generated Alerts](#dynamically-generated-alerts)
+[List of what contains checks for](#list-of-what-contains-checks-for)
+[sendUnitTestAlert](#sendunittestalert--generated-gradle-task-name-)
+[sendUnitTestResult](#sendunittestresult--generated-gradle-task-name-)
+[sendIntTestAlert](#sendinttestalert--generated-gradle-task-name-)
+[sendIntTestResult](#sendinttestresult--generated-gradle-task-name-)
+[sendLoadTestAlert](#sendloadtestalert--generated-gradle-task-name-)
+[sendAuthenticatedSmokeTestAlert](#sendauthenticatedsmoketestalert--generated-gradle-task-name-)
+[sendValidationSmokeTestAlert](#sendvalidationsmoketestalert--generated-gradle-task-name-)
+[sendUnauthenticatedSmokeTestAlert](#sendunauthenticatedsmoketestalert--generated-gradle-task-name-)
+[sendApplicationHealthCheckAlert](#sendapplicationhealthcheckalert--generated-gradle-task-name-)
+[sendApplicationInfoAlert](#sendapplicationinfoalert--generated-gradle-task-name-)
+[Known Issues](#known-issues)
+[Global Config](#global-config)
+[Messages](#messages)
+[Complete DSL](#complete-dsl)
+[Resources](#resources)
+
 ## Including the plugin
 
 I prefer any project I build to do the heavy lifting for me in the future, so I try to make the configuration as easy and
@@ -197,12 +230,13 @@ Also suggested you set this in the config block. While this can be configured on
 globally.
 
 ## Dynamically Generated Alerts
-Having the ability to send static messages can be great, it is much more likely you want the ability to programmatically
+Having the ability to send static messages can be great, but it is much more likely you want the ability to programmatically
 build your alert messages. Unfortunately, in order to accomplish this you will likely need to fork this plugin if the
 following does not cover your use cases. While these names are dynamically generated they work by checking if a task name
 `contains` a value to allow some flexibility when naming your dsl blocks. Thus, you can add values before or
 after the following parts but the following parts must be part of the dsl message name in order for the pre-defined
 generative tasks to be created.
+
 #### List of what contains checks for
 - unitTest
 - intTest
@@ -212,6 +246,42 @@ generative tasks to be created.
 - validationSmokeTest
 - applicationHealthCheck
 - applicationInfo
+
+In addition, in order to get message color and test results sent along with the dynamic messages your build should have
+the following properties declared in the main `build.gradle`
+```groovy
+ext.buildColor = ""
+ext.testResults = []
+```
+And you will want a block similar to the following added to any test blocks you have to populate the data. For a full example
+of what is necessary to send test results see [here](#full-gradle-test-block-config)
+```groovy
+afterSuite { desc, result ->
+        project.buildColor = result.failedTestCount == 0 ? "good" : "danger"
+
+        if (desc.parent) {
+            return
+        } // Only summarize results for whole modules
+
+        final String summary = "${result.resultType} " +
+                "(" +
+                "${result.testCount} tests, " +
+                "${result.successfulTestCount} successes, " +
+                "${result.failedTestCount} failures, " +
+                "${result.skippedTestCount} skipped" +
+                ") " +
+                "in ${TimeCategory.minus(new Date(result.endTime), new Date(result.startTime))}" +
+                "\n"
+
+        project.testResults = []
+        // Add reports in `testsUnitResults`, keep failed suites at the end
+        if (result.resultType == TestResult.ResultType.SUCCESS) {
+            project.testResults.add(0, summary)
+        } else {
+            project.testResults += summary
+        }
+    }
+```
 
 ### sendUnitTestAlert (generated Gradle task name)
 Used to send an alert that unit tests have passed
@@ -390,10 +460,7 @@ this may be a timing issue and tried inducing some waits but that did not change
 In short, call `sendIntTestResults` independently, and you will be fine - if you can get around the chaining issue or see
 a mistake I made please let me know.
 
-## My Complete DSL
-This is the full Slack DSL as I have it defined in my example projects
-
-### Global Config
+## Global Config
 ```groovy
 slackConfig {
 	webHook = System.env.SLACK_WEBHOOK
@@ -403,7 +470,7 @@ slackConfig {
 }
 ```
 
-### Messages
+## Messages
 ```groovy
 slackMessages {
 	applicationBuildStart {
@@ -698,6 +765,73 @@ slackMessages {
 		}
 	}
 }
+```
+
+## Complete DSL
+This is an example test block showing what needs to be included to populate the variables for the dynamic message as well
+as how the dynamic message send can be triggered after test complete.
+```groovy
+test { testTask ->
+    maxParallelForks ((env == "LOCAL") ? 5 : parseInt("$intParallelism"))           // Set max threads to speed up tests
+    reports.html.required = htmlReportsEnabled                                      // Configured in gradle.properties
+//    ignoreFailures = true
+
+    testLogging { logging ->
+        events TestLogEvent.FAILED,
+                TestLogEvent.SKIPPED,
+                TestLogEvent.STANDARD_OUT,
+                TestLogEvent.STANDARD_ERROR
+
+        exceptionFormat TestExceptionFormat.FULL
+        showExceptions true
+        showCauses true
+        showStackTraces true
+        showStandardStreams(parseBoolean("$testShowStandardStreams"))   // Show standard out and standard error of the test JVM(s) on the console
+    }
+
+    useJUnitPlatform {
+        if (!parseBoolean("$testAllEnabled")) {
+            // To run all available tests with ./gradlew clean test set `testAllEnabled` in gradle.properties to true
+            excludeTags "int", "slow", "thin", "load"
+        }
+    }
+
+    jacoco {
+        enabled = jacocoEnabled                                         // Configured in gradle.properties
+    }
+    finalizedBy unitTestReports                                         // instructs the tests to finish by generating a coverage report
+
+    afterSuite { desc, result ->
+        project.buildColor = result.failedTestCount == 0 ? "good" : "danger"
+
+        if (desc.parent) {
+            return
+        } // Only summarize results for whole modules
+
+        final String summary = "${result.resultType} " +
+                "(" +
+                "${result.testCount} tests, " +
+                "${result.successfulTestCount} successes, " +
+                "${result.failedTestCount} failures, " +
+                "${result.skippedTestCount} skipped" +
+                ") " +
+                "in ${TimeCategory.minus(new Date(result.endTime), new Date(result.startTime))}" +
+                "\n"
+
+        project.testResults = []
+        // Add reports in `testsUnitResults`, keep failed suites at the end
+        if (result.resultType == TestResult.ResultType.SUCCESS) {
+            project.testResults.add(0, summary)
+        } else {
+            project.testResults += summary
+        }
+    }
+
+}
+
+test.finalizedBy combineJaCoCoReports                   // Combine all present JaCoCo reports (exec files) into one
+combineJaCoCoReports.finalizedBy sendUnitTestAlert
+sendUnitTestAlert.finalizedBy sendUnitTestResults
 ```
 
 
