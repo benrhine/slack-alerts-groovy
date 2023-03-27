@@ -97,6 +97,7 @@ repositories {
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
+    implementation 'org.apache.commons:commons-configuration2:2.8.0'
     implementation "com.google.code.gson:gson:2.10.1"
     implementation "org.apache.httpcomponents.client5:httpclient5:5.2.1"
 }
@@ -120,11 +121,11 @@ gradlePlugin {
     }
 }
 
-task printVersion {
-    doLast {
-        println "$version"
-    }
-}
+//task printVersion {
+//    doLast {
+//        println "$version"
+//    }
+//}
 
 /** --------------------------------------------------------------------------------------------------------------------
  * Publish: Modern way to publish artifacts using the maven-publish plugin (Gradle 7+)
@@ -148,9 +149,10 @@ publishing {
             }
         }
     }
-    publications {
-        gpr(MavenPublication) {
-            from(components.java)
-        }
-    }
+    // This block already comes in with gradle publish
+//    publications {
+//        gpr(MavenPublication) {
+//            from(components.java)
+//        }
+//    }
 }
