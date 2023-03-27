@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-//        classpath 'com.benrhine:slack-alerts:1.0.0'
+//        classpath 'com.benrhine:slack-alerts-groovy:1.0.0'
     }
 }
 
@@ -85,9 +85,9 @@ ext.vcsPass                                 = System.env.GITHUB_TOKEN   // DO NO
 
 description 'Send static or dynamic alerts to a Slack WebHook or Bot'
 group 'com.benrhine'
-version "0.0.1"
+version "0.0.1-SNAPSHOT"
 
-//apply plugin: 'com.benrhine.slack-alerts'
+//apply plugin: 'com.benrhine.slack-alerts-groovy'
 
 repositories {
     mavenLocal()
@@ -114,7 +114,7 @@ gradlePlugin {
         slackAlertsPlugin {
             id = "com.benrhine.slack-alerts-groovy"
             description = project.description
-            displayName = 'Slack Alerts'
+            displayName = 'Slack Alerts using Groovy'
             implementationClass = 'com.benrhine.plugins.v1.SlackAlertsPlugin'
         }
     }
