@@ -9,22 +9,83 @@ buildscript {
 }
 
 plugins {
-    id "com.gradle.plugin-publish" version "1.1.0"
-    id "luisrjaeger.auto-versioning" version "1.0.6"
     id 'groovy'
+//    id 'com.benrhine.semantic-versioning-with-build-number' version '0.0.2'
+    id "com.gradle.plugin-publish" version "1.1.0"
 }
 
-description 'Gradle plugin that create tasks to post messages on Slack Webhook'
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// https://discuss.gradle.org/t/why-am-i-getting-this-no-matching-variant-failure-message/39248
+// https://discuss.gradle.org/t/why-does-my-consumer-prefer-java-8-variant-to-java-11-variant-while-building-with-java-11/39194/4
+configurations {
+    java11ApiElements {
+        canBeConsumed = true
+        canBeResolved = false
+        attributes {
+            attribute Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL)
+            attribute Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY)
+            attribute LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.JAR)
+            attribute Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_API)
+            attribute TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 11
+        }
+        outgoing {
+            variants {
+                classes {
+                    artifact(sourceSets.main.java.classesDirectory) {
+                        attributes {
+                            attribute LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.CLASSES)
+                        }
+                        type = 'java-classes-directory'
+                    }
+                }
+            }
+        }
+        extendsFrom(configurations.apiElements)
+    }
+    java11RuntimeElements {
+        canBeConsumed = true
+        canBeResolved = false
+        attributes {
+            attribute Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL)
+            attribute Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY)
+            attribute LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.JAR)
+            attribute Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME)
+            attribute TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 11
+        }
+        outgoing {
+            variants {
+                classes {
+                    artifact(sourceSets.main.java.classesDirectory) {
+                        attributes {
+                            attribute LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.CLASSES)
+                        }
+                        type = 'java-classes-directory'
+                    }
+                }
+                resources {
+                    artifact(sourceSets.main.output.resourcesDir) {
+                        attributes {
+                            attribute LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.CLASSES)
+                        }
+                        type = 'java-resources-directory'
+                    }
+                }
+            }
+        }
+        extendsFrom(configurations.runtimeElements)
+    }
+}
+
+ext.vcsUser                                 = System.env.GITHUB_ACTOR   // DO NOT PUT IN PROPERTIES FILE
+ext.vcsPass                                 = System.env.GITHUB_TOKEN   // DO NOT PUT IN PROPERTIES FILE
+
+description 'Send static or dynamic alerts to a Slack WebHook or Bot'
 group 'com.benrhine'
-version autoVersion.versionName()
-ext.pluginId = 'com.benrhine.slack-alerts'
-ext.branch = 'main'
-ext.commit = 'XXXXXX'
-
-autoVersion {
-    versionCycle = 100
-    releaseNotesFileName = null
-}
+version "0.0.1"
 
 //apply plugin: 'com.benrhine.slack-alerts'
 
@@ -36,29 +97,22 @@ repositories {
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation 'com.google.code.gson:gson:2.8.5'
-//    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
-//    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
-//    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime
-//    implementation 'org.apache.httpcomponents:httpmime:4.3.1'
-    // https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
-    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
-
-
+    implementation "com.google.code.gson:gson:2.10.1"
+    implementation "org.apache.httpcomponents.client5:httpclient5:5.2.1"
 }
 
 // Specify plugin properties that apply to the whole publishing bundle (ie. all plugins in the current publication).
 pluginBundle {
-    website = 'https://github.com/benrhine/slack-alerts-groovy'
+    website = 'https://benrhine.com'
     vcsUrl = 'https://github.com/benrhine/slack-alerts-groovy'
     description = project.description
-    tags = ['slack', 'webhook', 'message', 'bot']
+    tags = ['slack', 'webhook', 'message', 'bot', 'dynamic', 'alert']
 }
 
 gradlePlugin {
     plugins {
         slackAlertsPlugin {
-            id = project.pluginId
+            id = "com.benrhine.slack-alerts-groovy"
             description = project.description
             displayName = 'Slack Alerts'
             implementationClass = 'com.benrhine.plugins.v1.SlackAlertsPlugin'
@@ -66,105 +120,37 @@ gradlePlugin {
     }
 }
 
-ext.color = "good"
+task printVersion {
+    doLast {
+        println "$version"
+    }
+}
 
-// This will build static messages at application startup time
-//slack {
-//    publishedPlugin {
-//        webHook = "https://hooks.slack.com/services/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"
-//        attachment {
-//            fallback = "New version successfully published."
-//            pretext = "New version successfully published."
-//            color = "$color"
-//            field {
-//                title = "Module"
-//                value = project.name
-//                shortValue = true
-//            }
-//            field {
-//                title = "Version"
-//                value = project.version
-//                shortValue = true
-//            }
-//        }
-//        attachment {
-//            fallback = "Another line on sent together."
-//            pretext = "Another line on sent together."
-//            color = "$color"
-//            field {
-//                title = "Something"
-//                value = "Something text"
-//            }
-//        }
-//    }
-//    unitTestSuccess {
-//        webHook = "https://hooks.slack.com/services/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"
-//        attachment {
-//            fallback = "Unit tests successfully completed."
-//            pretext = "Unit tests successfully completed."
-//            color = "$color"
-//            field {
-//                title = "Application"
-//                value = project.name
-//                shortValue = true
-//            }
-//            field {
-//                title = "Version"
-//                value = project.version
-//                shortValue = true
-//            }
-//            field {
-//                title = "Branch"
-//                value = "$branch"
-//                shortValue = true
-//            }
-//            field {
-//                title = "Commit"
-//                value = "$commit"
-//                shortValue = true
-//            }
-//        }
-//        attachment {
-//            color = "$color"
-//            field {
-//                title = "Results"
-//                value = "Something text"
-//            }
-//        }
-//    }
-//    intTestSuccess {
-//        webHook = "https://hooks.slack.com/services/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"
-//        attachment {
-//            fallback = "Integration tests successfully completed."
-//            pretext = "Integration tests successfully completed."
-//            color = "$color"
-//            field {
-//                title = "Application"
-//                value = project.name
-//                shortValue = true
-//            }
-//            field {
-//                title = "Version"
-//                value = project.version
-//                shortValue = true
-//            }
-//            field {
-//                title = "Branch"
-//                value = "$branch"
-//                shortValue = true
-//            }
-//            field {
-//                title = "Commit"
-//                value = "$commit"
-//                shortValue = true
-//            }
-//        }
-//        attachment {
-//            color = "$color"
-//            field {
-//                title = "Results"
-//                value = "Something text"
-//            }
-//        }
-//    }
-//}
+/** --------------------------------------------------------------------------------------------------------------------
+ * Publish: Modern way to publish artifacts using the maven-publish plugin (Gradle 7+)
+ *
+ * Currently ./gradlew publish will publish a usable artifact to the local build folder. Once published the artifact
+ * will need to be copied over to the libraries project and pushed to the repository MANUALLY for use. It should
+ * be possible to automatically publish the artifact (see commented out repo block) but currently that configuration
+ * fails due to an xml parse error.
+ *
+ * https://www.jetbrains.com/help/idea/add-a-gradle-library-to-the-maven-repository.html#publish_remote
+ *
+ * ------------------------------------------------------------------------------------------------------------------ */
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/benrhine/libraries")
+            credentials {
+                username = "$vcsUser"
+                password = "$vcsPass"
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
